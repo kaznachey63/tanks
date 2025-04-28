@@ -1,4 +1,4 @@
-package com.av.latyshev.ak.mironov.BattleTanks.models
+package com.zxc.models
 
 data class Coordinate(
     val top: Int,

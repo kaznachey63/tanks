@@ -1,6 +1,6 @@
-package com.av.latyshev.ak.mironov.BattleTanks.models
+package com.zxc.models
 
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Material
+import com.zxc.enums.Material
 
 data class Element(
     val viewId: Int,

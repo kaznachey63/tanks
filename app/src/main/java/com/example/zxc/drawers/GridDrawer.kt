@@ -1,10 +1,10 @@
-package com.av.latyshev.ak.mironov.BattleTanks.drawers
+package com.zxc.drawers
 
 import android.graphics.Color
 import android.view.View
 import android.widget.FrameLayout
-import com.av.latyshev.ak.mironov.BattleTanks.CELL_SIZE
-import com.av.latyshev.ak.mironov.BattleTanks.binding
+import com.zxc.CELL_SIZE
+import com.zxc.binding
 
 class GridDrawer(private val context: FrameLayout) {
     private val allLines = mutableListOf<View>()

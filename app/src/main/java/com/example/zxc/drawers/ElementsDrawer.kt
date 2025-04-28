@@ -1,56 +1,61 @@
-package com.av.latyshev.ak.mironov.BattleTanks.drawers
+package com.zxc.drawers
 
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.core.view.marginLeft
 import androidx.core.view.marginTop
-import com.av.latyshev.ak.mironov.BattleTanks.CELL_SIZE
-import com.av.latyshev.ak.mironov.BattleTanks.R
-import com.av.latyshev.ak.mironov.BattleTanks.binding
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.DOWN
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.LEFT
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.RIGHT
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.UP
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Material
-import com.av.latyshev.ak.mironov.BattleTanks.models.Coordinate
-import com.av.latyshev.ak.mironov.BattleTanks.models.Element
+import com.zxc.CELL_SIZE
+import com.zxc.R
+import com.zxc.binding
+import com.zxc.enums.Direction
+import com.zxc.enums.Direction.DOWN
+import com.zxc.enums.Direction.LEFT
+import com.zxc.enums.Direction.RIGHT
+import com.zxc.enums.Direction.UP
+import com.zxc.enums.Material
+import com.zxc.models.Coordinate
+import com.zxc.models.Element
 
 class ElementsDrawer(val container: FrameLayout) {
     var currentMaterial = Material.EMPTY
     private val elementsOnContainer = mutableListOf<Element>()
 
-    private fun move(myTank:View, direction: Direction)
+    fun move(myTank:View, direction: Direction)
     {
+        val layoutParams = myTank.layoutParams as FrameLayout.LayoutParams
+        val currentCoordinate = Coordinate(layoutParams.topMargin, layoutParams.leftMargin)
         when (direction) {
             UP -> {
-                binding.myTank.rotation = 0f
-                if (binding.myTank.marginTop > 0) {
-                    (binding.myTank.layoutParams as FrameLayout.LayoutParams).topMargin -= CELL_SIZE
-                }
+                myTank.rotation = 0f
+                    (myTank.layoutParams as FrameLayout.LayoutParams).topMargin -= CELL_SIZE
             }
             DOWN -> {
-                binding.myTank.rotation = 180f
-                if (binding.myTank.marginTop + binding.myTank.height < binding.container.height / CELL_SIZE * CELL_SIZE) {
-                    (binding.myTank.layoutParams as FrameLayout.LayoutParams).topMargin += CELL_SIZE
-                }
+                myTank.rotation = 180f
+                    (myTank.layoutParams as FrameLayout.LayoutParams).topMargin += CELL_SIZE
             }
             LEFT -> {
-                binding.myTank.rotation = 270f
-                if (binding.myTank.marginLeft > 0) {
-                    (binding.myTank.layoutParams as FrameLayout.LayoutParams).leftMargin -= CELL_SIZE
-                }
+                myTank.rotation = 270f
+                    (myTank.layoutParams as FrameLayout.LayoutParams).leftMargin -= CELL_SIZE
             }
             RIGHT -> {
-                binding.myTank.rotation = 90f
-                if (binding.myTank.marginLeft + binding.myTank.width < binding.container.width / CELL_SIZE * CELL_SIZE) {
-                    (binding.myTank.layoutParams as FrameLayout.LayoutParams).leftMargin += CELL_SIZE
-                }
+                myTank.rotation = 90f
+                    (myTank.layoutParams as FrameLayout.LayoutParams).leftMargin += CELL_SIZE
             }
         }
-        binding.container.removeView(binding.myTank)
-        binding.container.addView(binding.myTank)
+
+        val nextCoordinate = Coordinate(layoutParams.topMargin, layoutParams.leftMargin)
+        if (checkTankCanMoveThroughBorder(
+            nextCoordinate,
+            myTank
+        ) && checkTankCanMoveThroughMaterial(nextCoordinate)
+            ) {
+            binding.container.removeView(myTank)
+            binding.container.addView(myTank)
+        } else {
+            (myTank.layoutParams as FrameLayout.LayoutParams).topMargin = currentCoordinate.top
+            (myTank.layoutParams as FrameLayout.LayoutParams).leftMargin = currentCoordinate.left
+        }
     }
 
     fun onTouchContainer(x:Float, y:Float) {
@@ -79,5 +84,42 @@ class ElementsDrawer(val container: FrameLayout) {
         view.layoutParams = layoutParams
         container.addView(view)
         elementsOnContainer.add(Element(viewId, currentMaterial, coordinate))
+    }
+    private fun checkTankCanMoveThroughMaterial(coordinate: Coordinate): Boolean {
+        getTankCoordinates(coordinate).forEach{
+            val element = getElementByCoordinates(it)
+            if (element != null && !element.material.tankCanGoThrough) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun checkTankCanMoveThroughBorder(coordinate: Coordinate, myTank: View): Boolean {
+        if(coordinate.top >= 0 &&
+            coordinate.top + myTank.height < binding.container.height &&
+            coordinate.left >= 0 &&
+            coordinate.left + myTank.width < binding.container.width
+        ) {
+            return true
+        }
+        return false
+    }
+
+    private fun getElementByCoordinates(coordinate: Coordinate) =
+        elementsOnContainer.firstOrNull { it.coordinate == coordinate }
+
+    private fun getTankCoordinates(topLeftCoordinate: Coordinate): List<Coordinate> {
+        val coordinateList = mutableListOf<Coordinate>()
+        coordinateList.add(topLeftCoordinate)
+        coordinateList.add(Coordinate(topLeftCoordinate.top + CELL_SIZE, topLeftCoordinate.left))
+        coordinateList.add(Coordinate(topLeftCoordinate.top, topLeftCoordinate.left + CELL_SIZE))
+        coordinateList.add(
+            Coordinate(
+                topLeftCoordinate.top + CELL_SIZE,
+                topLeftCoordinate.left + CELL_SIZE
+            )
+        )
+        return coordinateList
     }
 }

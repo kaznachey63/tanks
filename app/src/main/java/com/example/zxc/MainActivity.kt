@@ -1,9 +1,9 @@
-package com.av.latyshev.ak.mironov.BattleTanks
+package com.zxc
 
 import android.os.Bundle
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
-import com.av.latyshev.ak.mironov.BattleTanks.databinding.ActivityMainBinding
+import com.zxc.databinding.ActivityMainBinding
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_DPAD_UP
 import android.view.KeyEvent.KEYCODE_DPAD_DOWN
@@ -15,15 +15,15 @@ import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import androidx.core.view.marginLeft
 import androidx.core.view.marginTop
-import com.av.latyshev.ak.mironov.BattleTanks.drawers.ElementsDrawer
-import com.av.latyshev.ak.mironov.BattleTanks.drawers.GridDrawer
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.DOWN
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.LEFT
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.RIGHT
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.UP
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Material
-import com.av.latyshev.ak.mironov.BattleTanks.models.Coordinate
+import com.zxc.drawers.ElementsDrawer
+import com.zxc.drawers.GridDrawer
+import com.zxc.enums.Direction
+import com.zxc.enums.Direction.DOWN
+import com.zxc.enums.Direction.LEFT
+import com.zxc.enums.Direction.RIGHT
+import com.zxc.enums.Direction.UP
+import com.zxc.enums.Material
+import com.zxc.models.Coordinate
 
 const val CELL_SIZE = 50
 lateinit var binding: ActivityMainBinding
@@ -74,10 +74,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
-            KEYCODE_DPAD_UP -> move(binding.myTank, UP)
-            KEYCODE_DPAD_DOWN -> move(binding.myTank, DOWN)
-            KEYCODE_DPAD_LEFT -> move(binding.myTank, LEFT)
-            KEYCODE_DPAD_RIGHT -> move(binding.myTank, RIGHT)
+            KEYCODE_DPAD_UP -> elementsDrawer.move(binding.myTank, UP)
+            KEYCODE_DPAD_DOWN -> elementsDrawer.move(binding.myTank, DOWN)
+            KEYCODE_DPAD_LEFT -> elementsDrawer.move(binding.myTank, LEFT)
+            KEYCODE_DPAD_RIGHT -> elementsDrawer.move(binding.myTank, RIGHT)
         }
         return super.onKeyDown(keyCode, event)
     }
