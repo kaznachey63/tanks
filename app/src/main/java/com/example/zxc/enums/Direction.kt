@@ -1,4 +1,4 @@
-package com.zxc
+package com.av.latyshev.ak.mironov.BattleTanks.enums
 
 enum class Direction {
     UP,
