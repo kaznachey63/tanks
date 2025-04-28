@@ -1,7 +1,6 @@
 package com.zxc
 
 import android.os.Bundle
-import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.zxc.databinding.ActivityMainBinding
 import android.view.KeyEvent
@@ -9,21 +8,20 @@ import android.view.KeyEvent.KEYCODE_DPAD_UP
 import android.view.KeyEvent.KEYCODE_DPAD_DOWN
 import android.view.KeyEvent.KEYCODE_DPAD_LEFT
 import android.view.KeyEvent.KEYCODE_DPAD_RIGHT
+import android.view.KeyEvent.KEYCODE_SPACE
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
-import androidx.core.view.marginLeft
-import androidx.core.view.marginTop
+import com.zxc.drawers.BulletDrawer
 import com.zxc.drawers.ElementsDrawer
 import com.zxc.drawers.GridDrawer
-import com.zxc.enums.Direction
+import com.zxc.drawers.TankDrawer
 import com.zxc.enums.Direction.DOWN
 import com.zxc.enums.Direction.LEFT
 import com.zxc.enums.Direction.RIGHT
 import com.zxc.enums.Direction.UP
 import com.zxc.enums.Material
-import com.zxc.models.Coordinate
 
 const val CELL_SIZE = 50
 lateinit var binding: ActivityMainBinding
@@ -36,6 +34,14 @@ class MainActivity : AppCompatActivity() {
 
     private val elementsDrawer by lazy {
         ElementsDrawer(binding.container)
+    }
+
+    private val tankDrawer by lazy {
+        TankDrawer(binding.container)
+    }
+
+    private val bulletDrawer by lazy {
+        BulletDrawer(binding.container)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.editorGrass.setOnClickListener{ elementsDrawer.currentMaterial = Material.GRASS }
         binding.container.setOnTouchListener { _, event ->
-            elementsDrawer.drawView(Coordinate(event.y.toInt(), event.x.toInt()))
+            elementsDrawer.onTouchContainer(event.x, event.y)
             return@setOnTouchListener true
         }
     }
@@ -74,10 +80,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
-            KEYCODE_DPAD_UP -> elementsDrawer.move(binding.myTank, UP)
-            KEYCODE_DPAD_DOWN -> elementsDrawer.move(binding.myTank, DOWN)
-            KEYCODE_DPAD_LEFT -> elementsDrawer.move(binding.myTank, LEFT)
-            KEYCODE_DPAD_RIGHT -> elementsDrawer.move(binding.myTank, RIGHT)
+            KEYCODE_DPAD_UP -> tankDrawer.move(binding.myTank, UP, elementsDrawer.elementsOnContainer)
+            KEYCODE_DPAD_DOWN -> tankDrawer.move(binding.myTank, DOWN, elementsDrawer.elementsOnContainer)
+            KEYCODE_DPAD_LEFT -> tankDrawer.move(binding.myTank, LEFT, elementsDrawer.elementsOnContainer)
+            KEYCODE_DPAD_RIGHT -> tankDrawer.move(binding.myTank, RIGHT, elementsDrawer.elementsOnContainer)
+            KEYCODE_SPACE -> bulletDrawer.drawBullet(binding.myTank, tankDrawer.currentDirection)
         }
         return super.onKeyDown(keyCode, event)
     }
