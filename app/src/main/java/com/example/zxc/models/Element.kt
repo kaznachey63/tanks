@@ -1,13 +1,13 @@
-package com.av.latyshev.ak.mironov.BattleTanks.models
+package com.zxc.models
 
 import android.view.View
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Material
+import com.zxc.enums.Material
 
 data class Element constructor(
     val viewId: Int = View.generateViewId(),
     val material: Material,
-    val coordinate: Coordinate,
-    val width: Int,
-    val height: Int
+    var coordinate: Coordinate,
+    val width: Int = material.width,
+    val height: Int = material.height
 ) {
 }

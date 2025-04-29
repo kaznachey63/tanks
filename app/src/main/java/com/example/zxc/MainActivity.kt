@@ -1,9 +1,9 @@
-package com.av.latyshev.ak.mironov.BattleTanks
+package com.zxc
 
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.av.latyshev.ak.mironov.BattleTanks.databinding.ActivityMainBinding
+import com.zxc.databinding.ActivityMainBinding
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_DPAD_UP
 import android.view.KeyEvent.KEYCODE_DPAD_DOWN
@@ -14,32 +14,72 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
-import com.av.latyshev.ak.mironov.BattleTanks.drawers.BulletDrawer
-import com.av.latyshev.ak.mironov.BattleTanks.drawers.ElementsDrawer
-import com.av.latyshev.ak.mironov.BattleTanks.drawers.EnemyDrawer
-import com.av.latyshev.ak.mironov.BattleTanks.drawers.GridDrawer
-import com.av.latyshev.ak.mironov.BattleTanks.drawers.TankDrawer
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.DOWN
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.LEFT
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.RIGHT
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.UP
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Material
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable.ArrowDirection
+import com.zxc.drawers.BulletDrawer
+import com.zxc.drawers.ElementsDrawer
+import com.zxc.drawers.EnemyDrawer
+import com.zxc.drawers.GridDrawer
+import com.zxc.enums.Direction
+import com.zxc.enums.Direction.DOWN
+import com.zxc.enums.Direction.LEFT
+import com.zxc.enums.Direction.RIGHT
+import com.zxc.enums.Direction.UP
+import com.zxc.enums.Material
+import com.zxc.models.Coordinate
+import com.zxc.models.Element
+import com.zxc.models.Tank
 
 const val CELL_SIZE = 50
 lateinit var binding: ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private var editMode = false
+
+    private lateinit var playerTank: Tank
+    private lateinit var eagle: Element
+
+    private fun createTank(elementWidth: Int, elementHeight: Int): Tank {
+        playerTank = Tank(
+            Element(
+                material = Material.PLAYER_TANK,
+                coordinate = getPlayerTankCoordinate(elementWidth, elementHeight)
+            ), UP
+        )
+        return playerTank
+    }
+
+    private fun createEagle(elementWidth: Int, elementHeight: Int): Element {
+        eagle = Element(
+            material = Material.EAGLE,
+            coordinate = getEagleCoordinate(elementWidth, elementHeight)
+        )
+        return eagle
+    }
+
+    private fun getPlayerTankCoordinate(width: Int, height: Int) = Coordinate(
+        top = (height - height % 2)
+                - (height - height % 2) % CELL_SIZE
+                - Material.PLAYER_TANK.height * CELL_SIZE,
+        left = (width - width % (2 * CELL_SIZE)) / 2
+                - Material.EAGLE.width / 2 * CELL_SIZE
+                - Material.PLAYER_TANK.width * CELL_SIZE
+    )
+
+    private fun getEagleCoordinate(width: Int, height: Int) = Coordinate(
+        top = (height - height % 2)
+                - (height - height % 2) % CELL_SIZE
+                - Material.EAGLE.height * CELL_SIZE,
+        left = (width - width % (2 * CELL_SIZE)) / 2
+                - Material.EAGLE.width / 2 * CELL_SIZE
+    )
+
     private val gridDrawer by lazy {
         GridDrawer(binding.container)
     }
 
     private val elementsDrawer by lazy {
         ElementsDrawer(binding.container)
-    }
-
-    private val tankDrawer by lazy {
-        TankDrawer(binding.container)
     }
 
     private val bulletDrawer by lazy {
@@ -51,10 +91,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val enemyDrawer by lazy {
-        EnemyDrawer(binding.container)
+        EnemyDrawer(binding.container, elementsDrawer.elementsOnContainer)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -74,7 +113,25 @@ class MainActivity : AppCompatActivity() {
             return@setOnTouchListener true
         }
         elementsDrawer.drawElementsList(levelStorage.loadLevel())
+        elementsDrawer.drawElementsList(listOf(playerTank.element, eagle))
         hideSettings()
+    }
+
+    private fun countWidthHeight() {
+        val frameLayout = binding.container
+        frameLayout.viewTreeObserver
+            .addOnGlobalLayoutListener (object : OnGlobalLayoutListener{
+                override fun onGlobalLayout() {
+                    frameLayout.viewTreeObserver.removeOnGlobalLayoutListener (this)
+                    val elementWidth = frameLayout.width
+                    val elementHeight = frameLayout.height
+
+                    playerTank = createTank(elementWidth, elementHeight)
+                    eagle = createEagle(elementWidth, elementHeight)
+
+                    elementsDrawer.drawElementsList(listOf(playerTank.element, eagle))
+                }
+            })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -107,22 +164,27 @@ class MainActivity : AppCompatActivity() {
         if(editMode) {
             return
         }
-        enemyDrawer.startEnemyDrawing(elementsDrawer.elementsOnContainer)
+        enemyDrawer.startEnemyCreation()
+        enemyDrawer.moveEnemyTanks()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
-            KEYCODE_DPAD_UP -> tankDrawer.move(binding.myTank, UP, elementsDrawer.elementsOnContainer)
-            KEYCODE_DPAD_DOWN -> tankDrawer.move(binding.myTank, DOWN, elementsDrawer.elementsOnContainer)
-            KEYCODE_DPAD_LEFT -> tankDrawer.move(binding.myTank, LEFT, elementsDrawer.elementsOnContainer)
-            KEYCODE_DPAD_RIGHT -> tankDrawer.move(binding.myTank, RIGHT, elementsDrawer.elementsOnContainer)
+           KEYCODE_DPAD_UP -> move(UP)
+            KEYCODE_DPAD_DOWN -> move(DOWN)
+            KEYCODE_DPAD_LEFT -> move(LEFT)
+            KEYCODE_DPAD_RIGHT -> move(RIGHT)
             KEYCODE_SPACE -> bulletDrawer.makeBulletMove(
-                binding.myTank,
-                tankDrawer.currentDirection,
+                binding.container.findViewById(playerTank.element.viewId),
+                playerTank.direction,
                 elementsDrawer.elementsOnContainer
             )
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun move(direction: Direction) {
+        playerTank.move(direction, binding.container, elementsDrawer.elementsOnContainer)
     }
 
     private fun switchEditMode() {

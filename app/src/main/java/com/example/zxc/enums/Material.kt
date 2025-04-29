@@ -1,6 +1,6 @@
-package com.av.latyshev.ak.mironov.BattleTanks.enums
+package com.zxc.enums
 
-import com.av.latyshev.ak.mironov.BattleTanks.R
+import com.zxc.R
 
 const val CELLS_SIMPLE_ELEMENT = 1
 const val CELLS_EAGLE_WIDTH = 4
@@ -87,5 +87,14 @@ enum class Material(
         CELLS_TANKS_SIZE,
         CELLS_TANKS_SIZE,
         R.drawable.enemy_tank
+    ),
+    PLAYER_TANK(
+        false,
+        false,
+        true,
+        1,
+        CELLS_TANKS_SIZE,
+        CELLS_TANKS_SIZE,
+        R.drawable.tank
     )
 }

@@ -1,13 +1,13 @@
-package com.av.latyshev.ak.mironov.BattleTanks.utils
+package com.zxc.utils
 
 import android.app.Activity
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
-import com.av.latyshev.ak.mironov.BattleTanks.CELL_SIZE
-import com.av.latyshev.ak.mironov.BattleTanks.binding
-import com.av.latyshev.ak.mironov.BattleTanks.models.Coordinate
-import com.av.latyshev.ak.mironov.BattleTanks.models.Element
+import com.zxc.CELL_SIZE
+import com.zxc.binding
+import com.zxc.models.Coordinate
+import com.zxc.models.Element
 
 fun View.checkViewCanMoveThroughBorder(coordinate: Coordinate): Boolean {
     return coordinate.top >= 0 &&
@@ -48,7 +48,13 @@ fun Element.drawElement(container: FrameLayout) {
     view.id = this.viewId
     view.layoutParams = layoutParams
     view.scaleType  = ImageView.ScaleType.FIT_XY
-    (container.context as Activity).runOnUiThread {
+    container.runOnUiThread {
         container.addView(view)
+    }
+    }
+
+fun FrameLayout.runOnUiThread(block:() -> Unit) {
+    (this.context as Activity).runOnUiThread {
+        block()
     }
 }

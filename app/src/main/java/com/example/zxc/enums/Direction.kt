@@ -1,4 +1,4 @@
-package com.av.latyshev.ak.mironov.BattleTanks.enums
+package com.zxc.enums
 
 enum class Direction(val rotation: Float) {
     UP(0f),

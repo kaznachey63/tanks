@@ -1,21 +1,22 @@
-package com.av.latyshev.ak.mironov.BattleTanks.drawers
+package com.zxc.drawers
 
 import android.app.Activity
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
-import com.av.latyshev.ak.mironov.BattleTanks.CELL_SIZE
-import com.av.latyshev.ak.mironov.BattleTanks.R
-import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction
-import com.av.latyshev.ak.mironov.BattleTanks.models.Coordinate
-import com.av.latyshev.ak.mironov.BattleTanks.models.Element
-import com.av.latyshev.ak.mironov.BattleTanks.utils.checkViewCanMoveThroughBorder
-import com.av.latyshev.ak.mironov.BattleTanks.utils.getElementByCoordinates
+import com.zxc.CELL_SIZE
+import com.zxc.R
+import com.zxc.enums.Direction
+import com.zxc.models.Coordinate
+import com.zxc.models.Element
+import com.zxc.utils.checkViewCanMoveThroughBorder
+import com.zxc.utils.getElementByCoordinates
+import com.zxc.utils.runOnUiThread
 
 private const val BULLET_WIDTH = 15
 private const val BULLET_HEIGHT = 15
 
-class BulletDrawer(val container: FrameLayout) {
+class BulletDrawer(private val container: FrameLayout) {
     private var canBulletGoFuther = true
     private var bulletThread: Thread? = null
 
@@ -47,12 +48,12 @@ class BulletDrawer(val container: FrameLayout) {
                             (bullet.layoutParams as FrameLayout.LayoutParams).topMargin,
                             (bullet.layoutParams as FrameLayout.LayoutParams).leftMargin
                         ))
-                    (container.context as Activity).runOnUiThread {
+                    container.runOnUiThread {
                         container.removeView(bullet)
                         container.addView(bullet)
                     }
                 }
-                (container.context as Activity).runOnUiThread {
+                container.runOnUiThread {
                     container.removeView(bullet)
                 }
             })
@@ -110,8 +111,9 @@ class BulletDrawer(val container: FrameLayout) {
     private fun removeView( element: Element?) {
         val activity = container.context as Activity
         activity.runOnUiThread {
-            if (element!= null)
+            if (element != null) {
                 container.removeView(activity.findViewById(element.viewId))
+            }
         }
     }
 
