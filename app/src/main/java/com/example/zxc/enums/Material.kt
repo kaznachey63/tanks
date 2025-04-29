@@ -1,8 +1,13 @@
 package com.zxc.enums
 
-enum class Material(val tankCanGoThrough: Boolean) {
-    EMPTY(true),
-    BRICK(false),
-    CONCRETE(false),
-    GRASS(true),
+enum class Material(
+    val tankCanGoThrough: Boolean,
+    val bulletCanGoThrough: Boolean,
+    val simpleBulletCanDestroy: Boolean
+) {
+    EMPTY(true, true, true ),
+    BRICK(false, false, true),
+    CONCRETE(false, false, false),
+    GRASS(true, true, true),
+    EAGLE(false, false, true),
 }

@@ -11,6 +11,8 @@ import com.zxc.enums.Direction.RIGHT
 import com.zxc.enums.Direction.UP
 import com.zxc.models.Coordinate
 import com.zxc.models.Element
+import com.zxc.utils.checkViewCanMoveThroughBorder
+import com.zxc.utils.getElementByCoordinates
 
 class TankDrawer(val container: FrameLayout) {
     var currentDirection = UP
@@ -36,9 +38,8 @@ class TankDrawer(val container: FrameLayout) {
         }
 
         val nextCoordinate = Coordinate(layoutParams.topMargin, layoutParams.leftMargin)
-        if (checkTankCanMoveThroughBorder(
-                nextCoordinate,
-                myTank
+        if (myTank.checkViewCanMoveThroughBorder(
+                nextCoordinate
             ) && checkTankCanMoveThroughMaterial(nextCoordinate, elementsOnContainer)
         ) {
             binding.container.removeView(myTank)
@@ -62,7 +63,7 @@ class TankDrawer(val container: FrameLayout) {
         return true
     }
 
-    private fun checkTankCanMoveThroughBorder(coordinate: Coordinate, myTank: View): Boolean {
+    /*private fun checkTankCanMoveThroughBorder(coordinate: Coordinate, myTank: View): Boolean {
         if(coordinate.top >= 0 &&
             coordinate.top + myTank.height < binding.container.height &&
             coordinate.left >= 0 &&
@@ -71,7 +72,7 @@ class TankDrawer(val container: FrameLayout) {
             return true
         }
         return false
-    }
+    }*/
 
     private fun getTankCoordinates(topLeftCoordinate: Coordinate): List<Coordinate> {
         val coordinateList = mutableListOf<Coordinate>()
@@ -86,10 +87,4 @@ class TankDrawer(val container: FrameLayout) {
         )
         return coordinateList
     }
-
-    private fun getElementByCoordinates(
-        coordinate: Coordinate,
-        elementsOnContainer: List<Element>
-    ) =
-        elementsOnContainer.firstOrNull { it.coordinate == coordinate }
 }
