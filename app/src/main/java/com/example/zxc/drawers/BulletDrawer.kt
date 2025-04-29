@@ -1,16 +1,16 @@
-package com.zxc.drawers
+package com.av.latyshev.ak.mironov.BattleTanks.drawers
 
 import android.app.Activity
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
-import com.zxc.CELL_SIZE
-import com.zxc.R
-import com.zxc.enums.Direction
-import com.zxc.models.Coordinate
-import com.zxc.models.Element
-import com.zxc.utils.checkViewCanMoveThroughBorder
-import com.zxc.utils.getElementByCoordinates
+import com.av.latyshev.ak.mironov.BattleTanks.CELL_SIZE
+import com.av.latyshev.ak.mironov.BattleTanks.R
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction
+import com.av.latyshev.ak.mironov.BattleTanks.models.Coordinate
+import com.av.latyshev.ak.mironov.BattleTanks.models.Element
+import com.av.latyshev.ak.mironov.BattleTanks.utils.checkViewCanMoveThroughBorder
+import com.av.latyshev.ak.mironov.BattleTanks.utils.getElementByCoordinates
 
 private const val BULLET_WIDTH = 15
 private const val BULLET_HEIGHT = 15

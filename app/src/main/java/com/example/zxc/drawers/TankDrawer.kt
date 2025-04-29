@@ -1,18 +1,18 @@
-package com.zxc.drawers
+package com.av.latyshev.ak.mironov.BattleTanks.drawers
 
 import android.view.View
 import android.widget.FrameLayout
-import com.zxc.CELL_SIZE
-import com.zxc.binding
-import com.zxc.enums.Direction
-import com.zxc.enums.Direction.DOWN
-import com.zxc.enums.Direction.LEFT
-import com.zxc.enums.Direction.RIGHT
-import com.zxc.enums.Direction.UP
-import com.zxc.models.Coordinate
-import com.zxc.models.Element
-import com.zxc.utils.checkViewCanMoveThroughBorder
-import com.zxc.utils.getElementByCoordinates
+import com.av.latyshev.ak.mironov.BattleTanks.CELL_SIZE
+import com.av.latyshev.ak.mironov.BattleTanks.binding
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.DOWN
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.LEFT
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.RIGHT
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.UP
+import com.av.latyshev.ak.mironov.BattleTanks.models.Coordinate
+import com.av.latyshev.ak.mironov.BattleTanks.models.Element
+import com.av.latyshev.ak.mironov.BattleTanks.utils.checkViewCanMoveThroughBorder
+import com.av.latyshev.ak.mironov.BattleTanks.utils.getElementByCoordinates
 
 class TankDrawer(val container: FrameLayout) {
     var currentDirection = UP

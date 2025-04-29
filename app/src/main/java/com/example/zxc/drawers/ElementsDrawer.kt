@@ -1,13 +1,15 @@
-package com.zxc.drawers
+package com.av.latyshev.ak.mironov.BattleTanks.drawers
 
+import android.app.Activity
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
-import com.zxc.CELL_SIZE
-import com.zxc.enums.Material
-import com.zxc.models.Coordinate
-import com.zxc.models.Element
-import com.zxc.utils.getElementByCoordinates
+import com.av.latyshev.ak.mironov.BattleTanks.CELL_SIZE
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Material
+import com.av.latyshev.ak.mironov.BattleTanks.models.Coordinate
+import com.av.latyshev.ak.mironov.BattleTanks.models.Element
+import com.av.latyshev.ak.mironov.BattleTanks.utils.drawElement
+import com.av.latyshev.ak.mironov.BattleTanks.utils.getElementByCoordinates
 
 class ElementsDrawer(val container: FrameLayout) {
     var currentMaterial = Material.EMPTY
@@ -82,34 +84,24 @@ class ElementsDrawer(val container: FrameLayout) {
         return elements
     }
 
-    private fun removeIfSingleInstance() {
-        if (currentMaterial.canExistOnlyOne) {
-            elementsOnContainer.firstOrNull { it.material == currentMaterial }?.coordinate?.let {
-                eraseView(it)
+    private fun removeUnwantedInstance() {
+        if (currentMaterial.elementsAmountOnScreen != 0) {
+            val erasingElements = elementsOnContainer.filter { it.material == currentMaterial }
+            if (erasingElements.size >= currentMaterial.elementsAmountOnScreen) {
+                eraseView(erasingElements[0].coordinate)
             }
         }
     }
 
     private fun drawView(coordinate: Coordinate) {
-        removeIfSingleInstance()
-        val view = ImageView(container.context)
-        val layoutParams = FrameLayout.LayoutParams(
-            currentMaterial.width * CELL_SIZE,
-            currentMaterial.height * CELL_SIZE
-        )
-        view.setImageResource(currentMaterial.image)
-        layoutParams.topMargin = coordinate.top
-        layoutParams.leftMargin = coordinate.left
+        removeUnwantedInstance()
         val element = Element(
             material = currentMaterial,
             coordinate = coordinate,
             width = currentMaterial.width,
             height = currentMaterial.height
         )
-        view.id = element.viewId
-        view.layoutParams = layoutParams
-        view.scaleType = ImageView.ScaleType.FIT_XY
-        container.addView(view)
+        element.drawElement(container)
         elementsOnContainer.add(element)
     }
 

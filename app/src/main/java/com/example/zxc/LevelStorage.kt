@@ -1,8 +1,8 @@
-package com.zxc
+package com.av.latyshev.ak.mironov.BattleTanks
 
 import android.app.Activity
 import android.content.Context
-import com.zxc.models.Element
+import com.av.latyshev.ak.mironov.BattleTanks.models.Element
 import com.google.gson.Gson
 import androidx.core.content.edit
 import com.google.gson.reflect.TypeToken

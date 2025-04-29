@@ -1,9 +1,9 @@
-package com.zxc
+package com.av.latyshev.ak.mironov.BattleTanks
 
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.zxc.databinding.ActivityMainBinding
+import com.av.latyshev.ak.mironov.BattleTanks.databinding.ActivityMainBinding
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_DPAD_UP
 import android.view.KeyEvent.KEYCODE_DPAD_DOWN
@@ -14,15 +14,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
-import com.zxc.drawers.BulletDrawer
-import com.zxc.drawers.ElementsDrawer
-import com.zxc.drawers.GridDrawer
-import com.zxc.drawers.TankDrawer
-import com.zxc.enums.Direction.DOWN
-import com.zxc.enums.Direction.LEFT
-import com.zxc.enums.Direction.RIGHT
-import com.zxc.enums.Direction.UP
-import com.zxc.enums.Material
+import com.av.latyshev.ak.mironov.BattleTanks.drawers.BulletDrawer
+import com.av.latyshev.ak.mironov.BattleTanks.drawers.ElementsDrawer
+import com.av.latyshev.ak.mironov.BattleTanks.drawers.EnemyDrawer
+import com.av.latyshev.ak.mironov.BattleTanks.drawers.GridDrawer
+import com.av.latyshev.ak.mironov.BattleTanks.drawers.TankDrawer
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.DOWN
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.LEFT
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.RIGHT
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Direction.UP
+import com.av.latyshev.ak.mironov.BattleTanks.enums.Material
 
 const val CELL_SIZE = 50
 lateinit var binding: ActivityMainBinding
@@ -49,6 +50,10 @@ class MainActivity : AppCompatActivity() {
         LevelStorage(this)
     }
 
+    private val enemyDrawer by lazy {
+        EnemyDrawer(binding.container)
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +74,7 @@ class MainActivity : AppCompatActivity() {
             return@setOnTouchListener true
         }
         elementsDrawer.drawElementsList(levelStorage.loadLevel())
+        hideSettings()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -88,8 +94,20 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
 
+            R.id.menu_play -> {
+                startTheGame()
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun startTheGame() {
+        if(editMode) {
+            return
+        }
+        enemyDrawer.startEnemyDrawing(elementsDrawer.elementsOnContainer)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -108,13 +126,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun switchEditMode() {
-        if (editMode) {
-            gridDrawer.removeGrid()
-            binding.materialsContainer.visibility = INVISIBLE
-        } else {
-            gridDrawer.drawGrid()
-            binding.materialsContainer.visibility = VISIBLE
-        }
         editMode = !editMode
+        if (editMode) {
+            showSettings()
+        } else {
+            hideSettings()
+        }
+    }
+
+    private fun showSettings() {
+        gridDrawer.drawGrid()
+        binding.materialsContainer.visibility = VISIBLE
+    }
+
+    private fun hideSettings() {
+        gridDrawer.removeGrid()
+        binding.materialsContainer.visibility = INVISIBLE
     }
 }

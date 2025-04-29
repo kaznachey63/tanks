@@ -1,10 +1,13 @@
-package com.zxc.utils
+package com.av.latyshev.ak.mironov.BattleTanks.utils
 
+import android.app.Activity
 import android.view.View
-import com.zxc.CELL_SIZE
-import com.zxc.binding
-import com.zxc.models.Coordinate
-import com.zxc.models.Element
+import android.widget.FrameLayout
+import android.widget.ImageView
+import com.av.latyshev.ak.mironov.BattleTanks.CELL_SIZE
+import com.av.latyshev.ak.mironov.BattleTanks.binding
+import com.av.latyshev.ak.mironov.BattleTanks.models.Coordinate
+import com.av.latyshev.ak.mironov.BattleTanks.models.Element
 
 fun View.checkViewCanMoveThroughBorder(coordinate: Coordinate): Boolean {
     return coordinate.top >= 0 &&
@@ -31,4 +34,21 @@ fun getElementByCoordinates(
         }
     }
     return null
+}
+
+fun Element.drawElement(container: FrameLayout) {
+    val view = ImageView(container.context)
+    val layoutParams = FrameLayout.LayoutParams(
+        this.material.width * CELL_SIZE,
+        this.material.height * CELL_SIZE
+    )
+    this.material.image?.let { view.setImageResource(it) }
+    layoutParams.topMargin = this.coordinate.top
+    layoutParams.leftMargin = this.coordinate.left
+    view.id = this.viewId
+    view.layoutParams = layoutParams
+    view.scaleType  = ImageView.ScaleType.FIT_XY
+    (container.context as Activity).runOnUiThread {
+        container.addView(view)
+    }
 }
