@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.zxc.CELL_SIZE
+import com.zxc.GameCore.isPlaying
 import com.zxc.R
 import com.zxc.enums.Direction
 import com.zxc.enums.Material
@@ -45,6 +46,9 @@ class BulletDrawer(
     private fun moveAllBullets() {
         Thread(Runnable {
             while (true) {
+                if (!isPlaying()) {
+                    continue
+                }
                 interactWithAllBulleys()
                 Thread.sleep(30)
             }
