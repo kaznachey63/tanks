@@ -4,6 +4,7 @@ import android.util.Printer
 import android.widget.FrameLayout
 import com.zxc.CELL_SIZE
 import com.zxc.GameCore.isPlaying
+import com.zxc.SoundManager
 import com.zxc.binding
 import com.zxc.enums.CELLS_TANKS_SIZE
 import com.zxc.enums.Direction
@@ -83,6 +84,11 @@ class EnemyDrawer(
     }
 
     private fun goThroughAllTanks() {
+        if (tanks.isNotEmpty()) {
+            SoundManager.tankMove()
+        } else {
+            SoundManager.tankStop()
+        }
         tanks.toList().forEach {
             it.move(it.direction, container, elements)
             if(checkIfChanceBiggerThanRandom(10)) {
@@ -110,7 +116,6 @@ class EnemyDrawer(
     }
 
     fun removeTank(tankIndex: Int) {
-        if (tankIndex < 0) return
         tanks.removeAt(tankIndex)
     }
 }

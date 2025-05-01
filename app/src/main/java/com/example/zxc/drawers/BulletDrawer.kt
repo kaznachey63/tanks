@@ -7,6 +7,7 @@ import android.widget.ImageView
 import com.zxc.CELL_SIZE
 import com.zxc.GameCore.isPlaying
 import com.zxc.R
+import com.zxc.SoundManager
 import com.zxc.enums.Direction
 import com.zxc.enums.Material
 import com.zxc.models.Bullet
@@ -38,6 +39,7 @@ class BulletDrawer(
         val view = container.findViewById<View>(tank.element.viewId)?: return
         if (tank.alreadyHasBullets()) return
         allBullets.add(Bullet(createBullet(view, tank.direction), tank.direction, tank))
+         SoundManager.bulletShot()
     }
 
     private fun Tank.alreadyHasBullets(): Boolean =
@@ -163,6 +165,8 @@ class BulletDrawer(
     private fun removeTank(element: Element) {
         val tanksElements = enemyDrawer.tanks.map { it.element }
         val tankIndex = tanksElements.indexOf(element)
+        if (tankIndex < 0) return
+        SoundManager.bulletBurst()
         enemyDrawer.removeTank(tankIndex)
     }
 
