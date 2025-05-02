@@ -28,6 +28,7 @@ import com.zxc.enums.Material
 import com.zxc.models.Coordinate
 import com.zxc.models.Element
 import com.zxc.models.Tank
+import com.zxc.sounds.MainSoundPlayer
 
 const val CELL_SIZE = 50
 lateinit var binding: ActivityMainBinding
@@ -89,7 +90,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val soundManager by lazy {
-        SoundManager(this)
+        MainSoundPlayer(this)
     }
 
     private val gridDrawer by lazy {
@@ -113,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        soundManager.loadSounds()
         supportActionBar?.title = "Menu"
 
         binding.editorClear.setOnClickListener { elementsDrawer.currentMaterial = Material.EMPTY }
