@@ -1,10 +1,8 @@
 package com.zxc.drawers
 
-import android.app.Activity
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.ImageView
-import com.zxc.CELL_SIZE
+import com.zxc.activities.CELL_SIZE
 import com.zxc.enums.Material
 import com.zxc.models.Coordinate
 import com.zxc.models.Element

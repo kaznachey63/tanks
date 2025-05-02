@@ -1,7 +1,7 @@
 package com.zxc.drawers
 
 import android.widget.FrameLayout
-import com.zxc.CELL_SIZE
+import com.zxc.activities.CELL_SIZE
 import com.zxc.GameCore
 import com.zxc.sounds.MainSoundPlayer
 import com.zxc.enums.CELLS_TANKS_SIZE
@@ -115,7 +115,16 @@ class EnemyDrawer(
         moveEnemyTanks()
     }
 
+    fun isAllTankDestroyed(): Boolean {
+        return enemyAmount == MAX_ENEMY_AMOUNT && tanks.toList().isEmpty()
+    }
+
+    fun getPlayerScore() = enemyAmount * 100
+
     fun removeTank(tankIndex: Int) {
         tanks.removeAt(tankIndex)
+        if (isAllTankDestroyed()) {
+            gameCore.playerWon(getPlayerScore())
+        }
     }
 }

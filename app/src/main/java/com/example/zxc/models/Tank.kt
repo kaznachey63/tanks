@@ -2,8 +2,8 @@ package com.zxc.models
 
 import android.view.View
 import android.widget.FrameLayout
-import com.zxc.CELL_SIZE
-import com.zxc.binding
+import com.zxc.activities.CELL_SIZE
+import com.zxc.activities.binding
 import com.zxc.drawers.EnemyDrawer
 import com.zxc.enums.Direction
 import com.zxc.enums.Material
