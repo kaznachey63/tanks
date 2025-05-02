@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.zxc.CELL_SIZE
-import com.zxc.GameCore.isPlaying
+import com.zxc.GameCore
 import com.zxc.R
 import com.zxc.SoundManager
 import com.zxc.enums.Direction
@@ -19,7 +19,6 @@ import com.zxc.utils.getElementByCoordinates
 import com.zxc.utils.getTankByCoordinates
 import com.zxc.utils.getViewCoordinate
 import com.zxc.utils.runOnUiThread
-import kotlin.math.tan
 
 private const val BULLET_WIDTH = 15
 private const val BULLET_HEIGHT = 15
@@ -27,7 +26,9 @@ private const val BULLET_HEIGHT = 15
 class BulletDrawer(
     private val container: FrameLayout,
     private val elements: MutableList<Element>,
-    private val enemyDrawer: EnemyDrawer
+    private val enemyDrawer: EnemyDrawer,
+    private val soundManager: SoundManager,
+    private val gameCore: GameCore
 ) {
     init {
         moveAllBullets()
@@ -39,7 +40,7 @@ class BulletDrawer(
         val view = container.findViewById<View>(tank.element.viewId)?: return
         if (tank.alreadyHasBullets()) return
         allBullets.add(Bullet(createBullet(view, tank.direction), tank.direction, tank))
-         SoundManager.bulletShot()
+        soundManager.bulletShot()
     }
 
     private fun Tank.alreadyHasBullets(): Boolean =
@@ -48,7 +49,7 @@ class BulletDrawer(
     private fun moveAllBullets() {
         Thread(Runnable {
             while (true) {
-                if (!isPlaying()) {
+                if (!gameCore.isPlaying()) {
                     continue
                 }
                 interactWithAllBulleys()
@@ -154,7 +155,7 @@ class BulletDrawer(
             if (element.material.simpleBulletCanDestroy) {
                 stopBullet(bullet)
                 removeView(element)
-                elements.remove(element)
+                removeElement(element)
                 removeTank(element)
             } else {
                 stopBullet(bullet)
@@ -162,11 +163,18 @@ class BulletDrawer(
         }
     }
 
+    private fun removeElement(element: Element) {
+        elements.remove(element)
+        if (element.material == Material.PLAYER_TANK || element.material == Material.EAGLE) {
+            gameCore.destroyPlayerOrBase()
+        }
+    }
+
     private fun removeTank(element: Element) {
         val tanksElements = enemyDrawer.tanks.map { it.element }
         val tankIndex = tanksElements.indexOf(element)
         if (tankIndex < 0) return
-        SoundManager.bulletBurst()
+        soundManager.bulletBurst()
         enemyDrawer.removeTank(tankIndex)
     }
 

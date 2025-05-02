@@ -4,13 +4,8 @@ import android.view.View
 import android.widget.FrameLayout
 import com.zxc.CELL_SIZE
 import com.zxc.binding
-import com.zxc.drawers.BulletDrawer
 import com.zxc.drawers.EnemyDrawer
 import com.zxc.enums.Direction
-import com.zxc.enums.Direction.DOWN
-import com.zxc.enums.Direction.LEFT
-import com.zxc.enums.Direction.RIGHT
-import com.zxc.enums.Direction.UP
 import com.zxc.enums.Material
 import com.zxc.utils.checkIfChanceBiggerThanRandom
 import com.zxc.utils.checkViewCanMoveThroughBorder
@@ -22,7 +17,7 @@ import kotlin.random.Random
 class Tank(
      val element: Element,
      var direction: Direction,
-    private val enemyDrawer: EnemyDrawer
+     private val enemyDrawer: EnemyDrawer
     ) {
     fun move(
         direction: Direction,
@@ -99,7 +94,7 @@ class Tank(
         for (anyCoordinate in getElementByCoordinates(coordinate)) {
             var element = getElementByCoordinates(anyCoordinate, elementsOnContainer)
             if(element == null) {
-                //element = getElementByCoordinates(anyCoordinate, enemyDrawer.tanks)
+               // element = getElementByCoordinates(anyCoordinate, enemyDrawer.tanks)
             }
             if (element != null && !element.material.tankCanGoThrough) {
                 if(this == element) {

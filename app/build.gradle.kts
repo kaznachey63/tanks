@@ -7,6 +7,9 @@ android {
     namespace = "com.example.zxc"
     compileSdk = 35
 
+    viewBinding {
+        enable = true
+    }
     defaultConfig {
         applicationId = "com.example.zxc"
         minSdk = 24
