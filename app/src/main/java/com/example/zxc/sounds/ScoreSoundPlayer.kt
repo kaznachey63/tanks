@@ -3,6 +3,8 @@ package com.example.zxc.sounds
 import android.content.Context
 import android.content.pm.PackageManager
 import com.zxc.R
+import com.zxc.sounds.GameSound
+import com.zxc.sounds.SoundPoolFactory
 
 class ScoreSoundPlayer(
     private val context: Context,

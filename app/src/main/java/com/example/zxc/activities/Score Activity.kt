@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.zxc.databinding.ActivityScoreBinding
-import com.zxc.sounds.ScoreSoundPlayer
+import com.example.zxc.sounds.ScoreSoundPlayer
 
 const val SCORE_REQUEST_CODE = 100
 

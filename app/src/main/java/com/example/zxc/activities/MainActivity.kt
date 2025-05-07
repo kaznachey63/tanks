@@ -13,6 +13,7 @@ import android.view.KeyEvent.KEYCODE_DPAD_RIGHT
 import android.view.KeyEvent.KEYCODE_SPACE
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View.GONE
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
@@ -34,15 +35,19 @@ import com.zxc.models.Coordinate
 import com.zxc.models.Element
 import com.zxc.models.Tank
 import com.zxc.sounds.MainSoundPlayer
+import com.example.zxc.utils.ProgressIndicator
 
 const val CELL_SIZE = 50
+
 lateinit var binding: ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ProgressIndicator {
     private var editMode = false
     private lateinit var item: MenuItem
+
     private lateinit var playerTank: Tank
     private lateinit var eagle: Element
+
 
     private val bulletDrawer by lazy {
         BulletDrawer(
@@ -54,6 +59,14 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private val gameCore by lazy {
+        GameCore(this)
+    }
+
+    private val soundManager by lazy {
+        MainSoundPlayer(this, this)
+    }
+
     private fun createTank(elementWidth: Int, elementHeight: Int): Tank {
         playerTank = Tank(
             Element(
@@ -61,7 +74,7 @@ class MainActivity : AppCompatActivity() {
                 coordinate = getPlayerTankCoordinate(elementWidth, elementHeight)
             ), UP,
             enemyDrawer
-            )
+        )
         return playerTank
     }
 
@@ -90,14 +103,6 @@ class MainActivity : AppCompatActivity() {
                 - Material.EAGLE.width / 2 * CELL_SIZE
     )
 
-    private val gameCore by lazy {
-        GameCore(this)
-    }
-
-    private val soundManager by lazy {
-        MainSoundPlayer(this)
-    }
-
     private val gridDrawer by lazy {
         GridDrawer(binding.container)
     }
@@ -107,7 +112,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val levelStorage by lazy {
-        LevelStorage(this)
+        LevelStorage (this)
     }
 
     private val enemyDrawer by lazy {
@@ -124,17 +129,14 @@ class MainActivity : AppCompatActivity() {
 
         binding.editorClear.setOnClickListener { elementsDrawer.currentMaterial = Material.EMPTY }
         binding.editorBrick.setOnClickListener { elementsDrawer.currentMaterial = Material.BRICK }
-        binding.editorConcrete.setOnClickListener {
-            elementsDrawer.currentMaterial = Material.CONCRETE
-        }
-        binding.editorGrass.setOnClickListener{ elementsDrawer.currentMaterial = Material.GRASS }
+        binding.editorConcrete.setOnClickListener { elementsDrawer.currentMaterial = Material.CONCRETE }
+        binding.editorGrass.setOnClickListener { elementsDrawer.currentMaterial = Material.GRASS }
+
         binding.container.setOnTouchListener { _, event ->
-            if (!editMode) {
-                return@setOnTouchListener true
-            }
-            elementsDrawer.onTouchContainer(event.x, event.y)
+            if (editMode) elementsDrawer.onTouchContainer(event.x, event.y)
             return@setOnTouchListener true
         }
+
         elementsDrawer.drawElementsList(levelStorage.loadLevel())
         hideSettings()
         countWidthHeight()
@@ -143,9 +145,9 @@ class MainActivity : AppCompatActivity() {
     private fun countWidthHeight() {
         val frameLayout = binding.container
         frameLayout.viewTreeObserver
-            .addOnGlobalLayoutListener (object : OnGlobalLayoutListener{
+            .addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
-                    frameLayout.viewTreeObserver.removeOnGlobalLayoutListener (this)
+                    frameLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
                     val elementWidth = frameLayout.width
                     val elementHeight = frameLayout.height
 
@@ -156,98 +158,6 @@ class MainActivity : AppCompatActivity() {
                     enemyDrawer.bulletDrawer = bulletDrawer
                 }
             })
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.settings, menu)
-        item = menu!!.findItem(R.id.menu_play)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_settings -> {
-                switchEditMode()
-                return true
-            }
-
-            R.id.menu_save -> {
-                levelStorage.saveLevel(elementsDrawer.elementsOnContainer)
-                return true
-            }
-
-            R.id.menu_play -> {
-                if(editMode) {
-                    return true
-                }
-                gameCore.startOrPauseTheGame()
-                if (gameCore.isPlaying()) {
-                    startTheGame()
-                } else {
-                    pauseTheGame()
-                }
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun pauseTheGame() {
-        item.icon = ContextCompat.getDrawable(this, R.drawable.ic_play)
-        gameCore.pauseTheGame()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        pauseTheGame()
-        soundManager.pauseSounds()
-    }
-
-    private fun startTheGame() {
-        item.icon = ContextCompat.getDrawable(this, R.drawable.ic_pause)
-        enemyDrawer.startEnemyCreation()
-        soundManager.playIntroMusic()
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (!gameCore.isPlaying()) {
-            return super.onKeyDown(keyCode, event)
-        }
-        when (keyCode) {
-           KEYCODE_DPAD_UP -> onButtonPressed(UP)
-            KEYCODE_DPAD_DOWN -> onButtonPressed(DOWN)
-            KEYCODE_DPAD_LEFT -> onButtonPressed(LEFT)
-            KEYCODE_DPAD_RIGHT -> onButtonPressed(RIGHT)
-            KEYCODE_SPACE -> bulletDrawer.addNewBulletForTank(playerTank)
-        }
-        return super.onKeyDown(keyCode, event)
-    }
-
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        when (keyCode) {
-            KEYCODE_DPAD_UP, KEYCODE_DPAD_LEFT,
-            KEYCODE_DPAD_DOWN, KEYCODE_DPAD_RIGHT -> onButtonReleased()
-        }
-        return super.onKeyUp(keyCode, event)
-    }
-
-    private fun onButtonPressed(direction: Direction) {
-        soundManager.tankMove()
-        playerTank.move(direction, binding.container, elementsDrawer.elementsOnContainer)
-    }
-
-    fun onButtonReleased() {
-        if (enemyDrawer.tanks.isEmpty()) {
-            soundManager.tankStop()
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK && resultCode == SCORE_REQUEST_CODE) {
-            recreate()
-        }
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun switchEditMode() {
@@ -267,5 +177,115 @@ class MainActivity : AppCompatActivity() {
     private fun hideSettings() {
         gridDrawer.removeGrid()
         binding.materialsContainer.visibility = INVISIBLE
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.settings, menu)
+        item = menu!!.findItem(R.id.menu_play)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_settings -> {
+                gridDrawer.drawGrid()
+                switchEditMode()
+                true
+            }
+
+            R.id.menu_save -> {
+                levelStorage.saveLevel(elementsDrawer.elementsOnContainer)
+                true
+            }
+
+            R.id.menu_play -> {
+                if(editMode)  {
+                    return true
+                }
+                gameCore.startOrPauseTheGame()
+                if (gameCore.isPlaying()){
+                    startTheGame()
+                }
+                else{
+                    pauseTheGame()
+                }
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun pauseTheGame() {
+        item.icon = ContextCompat.getDrawable(this , R.drawable.ic_play)
+        gameCore.pauseTheGame()
+        soundManager.pauseSounds()
+    }
+
+    override fun onPause(){
+        super.onPause()
+        pauseTheGame()
+    }
+
+
+    private fun startTheGame() {
+        enemyDrawer.startEnemyCreation()
+        item.icon = ContextCompat.getDrawable(this , R.drawable.ic_pause)
+        soundManager.playIntroMusic()
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (!gameCore.isPlaying()){
+            return super.onKeyDown(keyCode, event)
+        }
+        when(keyCode){
+            KEYCODE_DPAD_UP -> move(UP)
+            KEYCODE_DPAD_DOWN -> move(DOWN)
+            KEYCODE_DPAD_RIGHT -> move(RIGHT)
+            KEYCODE_DPAD_LEFT -> move(LEFT)
+            KEYCODE_SPACE -> bulletDrawer.addNewBulletForTank(playerTank)
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    private fun move(direction: Direction) {
+        playerTank.move(direction, binding.container, elementsDrawer.elementsOnContainer)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KEYCODE_DPAD_UP, KEYCODE_DPAD_LEFT,
+            KEYCODE_DPAD_DOWN, KEYCODE_DPAD_RIGHT -> onButtonReleased()
+        }
+        return super.onKeyUp(keyCode, event)
+    }
+
+    private fun onButtonPressed(direction: Direction) {
+        soundManager.tankMove()
+        playerTank.move(direction, binding.container, elementsDrawer.elementsOnContainer)
+    }
+
+    private fun onButtonReleased() {
+        if (enemyDrawer.tanks.isEmpty())
+            soundManager.tankStop()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(resultCode == Activity.RESULT_OK && requestCode == SCORE_REQUEST_CODE){
+            recreate()
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun showProgress() {
+        binding.container.visibility = INVISIBLE
+        binding.totalContainer.setBackgroundResource(R.color.gray)
+        binding.initTitle.visibility = VISIBLE
+    }
+
+    override fun dismissProgress() {
+        binding.container.visibility = VISIBLE
+        binding.totalContainer.setBackgroundResource(R.color.black)
+        binding.initTitle.visibility = GONE
     }
 }

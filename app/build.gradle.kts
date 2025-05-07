@@ -4,12 +4,9 @@ plugins {
 }
 
 android {
-    namespace = "com.example.zxc"
+    namespace = "com.zxc"
     compileSdk = 35
 
-    viewBinding {
-        enable = true
-    }
     defaultConfig {
         applicationId = "com.example.zxc"
         minSdk = 24
@@ -36,10 +33,14 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
-
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
