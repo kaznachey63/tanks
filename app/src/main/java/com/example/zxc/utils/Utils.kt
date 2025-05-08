@@ -13,6 +13,7 @@ import kotlin.random.Random
 
 const val TOTAL_PERCENT = 100
 
+// метод можел ли перемещаться элемент, в зависимости от координат
 fun View.checkViewCanMoveThroughBorder(coordinate: Coordinate): Boolean {
     return coordinate.top >= 0 &&
             coordinate.top + this.height <= binding.container.height &&
@@ -67,6 +68,7 @@ fun FrameLayout.runOnUiThread(block:() -> Unit) {
     }
 }
 
+// метод проверки шанса (%) изм. направления движения
 fun checkIfChanceBiggerThanRandom(percentChance: Int): Boolean {
     return Random.nextInt(TOTAL_PERCENT) <= percentChance
 }
