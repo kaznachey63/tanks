@@ -20,9 +20,11 @@ import com.zxc.utils.getTankByCoordinates
 import com.zxc.utils.getViewCoordinate
 import com.zxc.utils.runOnUiThread
 
+// размеры пули
 private const val BULLET_HEIGHT = 15
 private const val BULLET_WIDTH = 15
 
+// класс отрисовки пули
 class BulletDrawer(
     private val container: FrameLayout,
     private val elements: MutableList<Element>,
@@ -31,55 +33,74 @@ class BulletDrawer(
     private val gameCore: GameCore
 
 ) {
+    // вып. при создании объекта класса (после иниц. всех свойств , но до того как др. методы станут доступны)
     init {
-        moveAllBullets()
+        moveAllBullets() // перемещение всех пуль 
     }
 
+    // список хранения всех пуль
     private val allBullets = mutableListOf<Bullet>()
 
+    // метод для создания новой пули
     fun addNewBulletForTank(tank: Tank) {
+        // находим танк (если нулл - выходим)
         val view = container.findViewById<View>(tank.element.viewId) ?: return
-        if (tank.alreadyHasBullet()) return
-        allBullets.add(Bullet(createBullet(view, tank.direction), tank.direction, tank))
-        soundManager.bulletShot()
+        if (tank.alreadyHasBullet()) return // если танк уже имеет пулю - выходим
+
+        // создание и добавление пули
+        allBullets.add(Bullet(
+            createBullet(view, tank.direction),
+            tank.direction, 
+            tank))
+        soundManager.bulletShot() // звук стрельбы
     }
 
-    private fun Tank.alreadyHasBullet(): Boolean =
+    // метод для проверки наличия пули 
+    private fun Tank.alreadyHasBullet(): Boolean {
+        // метод для поиска пули (первой подходящей)
         allBullets.firstOrNull { it.tank == this } != null
-
-    private fun moveAllBullets() {
-        Thread(Runnable {
-            while (true) {
-                if (!gameCore.isPlaying())
-                    continue
-                interactWithAllBullets()
-                Thread.sleep(30)
-            }
-        }).start()
     }
 
+    // метод для движения всех пуль 
+    private fun moveAllBullets() {
+        // создается новый поток с помощью конструктора для параллельного выполнения
+        Thread( 
+            Runnable {
+                while (true) {
+                    if (!gameCore.isPlaying()) continue // если нет игры
+                    interactWithAllBullets() // взаймодействуем 
+                    Thread.sleep(30) // задержка 30 м\с
+                }
+            }
+        ).start()
+    }
+
+    // метод для обработки взаимодействия пуль
     private fun interactWithAllBullets() {
-        for (bullet in allBullets.toList()) {
+        for (bullet in allBullets.toList()) { // перебор пули из списка
+            bullet.stopIntersectingBullets() // проверяем на столкновение
 
-            bullet.stopIntersectingBullets()
-
+            // если пуля не может двигаться - останавливаем, пропускаем
             if (!bullet.canBulletGoFurther()) {
                 stopBullet(bullet)
                 continue
             }
 
             val view = bullet.view
-            when (bullet.direction) {
+            when (bullet.direction) { // определение направления движения пули
                 Direction.UP -> (view.layoutParams as FrameLayout.LayoutParams).topMargin -= BULLET_HEIGHT
                 Direction.DOWN -> (view.layoutParams as FrameLayout.LayoutParams).topMargin += BULLET_HEIGHT
                 Direction.LEFT -> (view.layoutParams as FrameLayout.LayoutParams).leftMargin -= BULLET_HEIGHT
                 Direction.RIGHT -> (view.layoutParams as FrameLayout.LayoutParams).rightMargin += BULLET_HEIGHT
             }
-
+            
+            // проверка на столкновения с объектами в зависимости направления пули
             chooseBehaviourInTermsOfDirections(bullet)
 
-            container.runOnUiThread {
-                container.removeView(view)
+            // обновление позиции пули
+            // (Удаляем пульку со старого места и сразу же вставляем её заново)
+            container.runOnUiThread { // выполнение кода в осн. потоке
+                container.removeView(view) 
                 container.addView(view)
             }
         }
@@ -97,96 +118,139 @@ class BulletDrawer(
         allBullets.removeAll(removingList)
     }
 
+    // метод для обработки столкновения пуль
     private fun Bullet.stopIntersectingBullets() {
+        // получение текущих координат пули
         val bulletCoordinate = this.view.getViewCoordinate()
-        for (bulletInList in allBullets) {
-            val coordinateList = bulletInList.view.getViewCoordinate()
-            if (this == bulletInList) continue
 
+        for (bulletInList in allBullets) { // перебор всех пуль со списка
+            // получение координат другой пули
+            val coordinateList = bulletInList.view.getViewCoordinate()
+
+            if (this == bulletInList) continue // не является ли пуля самой собой
+
+            // если столкновение двух пуль (совпали координаты)
             if (coordinateList == bulletCoordinate) {
-                stopBullet(this)
-                stopBullet(bulletInList)
+                stopBullet(this) // стоп эту пулю
+                stopBullet(bulletInList) // стоп пулю в которую врезалиись
                 return
             }
         }
     }
 
-    private fun Bullet.canBulletGoFurther() =
+    // метод для проверки продолжения движения пули
+    private fun Bullet.canBulletGoFurther() {
+        // не выходит ли пуля за рамки (с полученнным координатами передаем)
+        // И
+        // может ли пуля рподолжать движение
         this.view.checkViewCanMoveThroughBorder(this.view.getViewCoordinate()) && this.canMoveFurther
+    }
 
+    // определяет направление движения пули
     private fun chooseBehaviourInTermsOfDirections(bullet: Bullet) {
+        // напрвавление пули
         when (bullet.direction) {
+            // вертикальное направление
             Direction.DOWN, Direction.UP -> {
+                // получение списка координат для проверки
                 compareCollections(getCoordinatesForTopOrBottomDirection(bullet), bullet)
             }
 
+            // горизонтальное направление
             Direction.LEFT, Direction.RIGHT -> {
                 compareCollections(getCoordinatesForLeftOrRightDirection(bullet), bullet)
             }
         }
     }
 
-    private fun compareCollections(detectedCoordinatesList: List<Coordinate>, bullet: Bullet) {
+    // метод для обнаружения и уничтожения элемента
+    private fun compareCollections(
+        detectedCoordinatesList: List<Coordinate>, 
+        bullet: Bullet
+    ) {
+        // перебор координат в списке
         for (coordinate in detectedCoordinatesList) {
+            // посик танка по коордианатм
             val element = getTankByCoordinates(coordinate, enemyDrawer.tanks)
-                ?: getElementByCoordinates(coordinate, elements)
+                ?: // не нашел и ищет элемент по координатам
+                getElementByCoordinates(coordinate, elements) 
 
+            // не является ли элемент самим танком
             if (element == bullet.tank.element) continue
 
-            removeElementsAndStopBullet(element, bullet)
+            // удаление элемента и остановка пули 
+            removeElementsAndStopBullet(element, bullet)  
         }
     }
+    
+    // метод для удаления элемнетов и остановки пули
+    private fun removeElementsAndStopBullet(
+        element: Element?, 
+        bullet: Bullet
+    ) {
+        if (element == null) return // не нулл ли
 
-    private fun removeElementsAndStopBullet(element: Element?, bullet: Bullet) {
-        if (element == null) return
-
+        // не стреляет ли враг в другого врага
         if (bullet.tank.element.material == Material.ENEMY_TANK
             && element.material == Material.ENEMY_TANK) {
-            stopBullet(bullet)
+            stopBullet(bullet) // останавливаем пулю
             return
         }
 
+        // пуля может проходить через материал 
         if (element.material.bulletCanGoThrough) return
 
+        // пуля может уничтожить элемент
         if (element.material.simpleBulletCanDestroy) {
-            removeView(element)
-            removeElement(element)
-            stopGameIfNecessary(element)
-            removeTank(element)
+            removeView(element) // удалили представление
+            removeElement(element) // удалили элемент
+            stopGameIfNecessary(element) // победили игрока
+            removeTank(element) // удаление танка
         }
 
+        // останавливаем пулю
         stopBullet(bullet)
     }
 
+    // метод удаления элемента 
     private fun removeElement(element: Element?) {
         elements.remove(element)
     }
 
+    // метод остановки игры при уничтожении игрока \ базы
     private fun stopGameIfNecessary(element: Element) {
+        // если танк игрока ИЛИ база игрока
         if (element.material == Material.PLAYER_TANK || element.material == Material.EAGLE)
+            // игрока победили, передача очков
             gameCore.destroyPlayerOrBase(enemyDrawer.getPlayerScore())
     }
 
-
+    // метод для удаления танка
     private fun removeTank(element: Element) {
+        // создание списка элементов всех врагов
         val tanksElements = enemyDrawer.tanks.map { it.element }
-        val tankIndex = tanksElements.indexOf(element)
-        if (tankIndex < 0) return
 
-        soundManager.bulletBurst()
-        enemyDrawer.removeTank(tankIndex)
+        // находим индекс элемента в списке
+        val tankIndex = tanksElements.indexOf(element)
+
+        if (tankIndex < 0) return // найден ли элемент
+
+        soundManager.bulletBurst() // звук взрыва
+        enemyDrawer.removeTank(tankIndex) // удаление врага из списка
     }
 
+    // метод остановки движения пули
     private fun stopBullet(bullet: Bullet) {
         bullet.canMoveFurther = false
     }
 
+    // метод удаления элемента с виду
     private fun removeView(element: Element?) {
+        // получение контекста контейнера и приведение его к типу Activity
         val activity = container.context as Activity
-        activity.runOnUiThread {
-            if (element != null) {
-                container.removeView(activity.findViewById(element.viewId))
-            }
+        activity.runOnUiThread { // выполнение кода в основном потоке
+            // ненулл ли И затем удаление элемента с виду
+            if (element != null) container.removeView(activity.findViewById(element.viewId))
         }
     }
 
@@ -257,6 +321,7 @@ class BulletDrawer(
 
         return tankLeftTopCoordinate
     }
+
     private fun getDistanceToMiddleOfTanks(startCoordinate: Int, bulletSize: Int):Int {
         return startCoordinate + (CELL_SIZE - bulletSize/2)
     }

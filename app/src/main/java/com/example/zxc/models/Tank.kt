@@ -26,6 +26,7 @@ class Tank (
         container: FrameLayout,
         elementsOnContainer: List<Element>
     ) {
+        // получение вида танка (если нулл - то завершение)
         val view = container.findViewById<View>(element.viewId)?: return
         val currentCoordinate = view.getViewCoordinate()
         this.direction = direction

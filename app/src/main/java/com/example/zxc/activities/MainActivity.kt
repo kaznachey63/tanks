@@ -131,6 +131,7 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
                 - Material.EAGLE.width / 2 * CELL_SIZE
     )
 
+    // метод запуска программы
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -159,23 +160,24 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
     // метод который рассчитывает размеры контейнера и создает игровые объекты
     private fun countWidthHeight() {
         val frameLayout = binding.container
-        frameLayout.viewTreeObserver // отслеживание изменений в размерах контейнера
-            .addOnGlobalLayoutListener(object : OnGlobalLayoutListener { 
-                override fun onGlobalLayout() { // все элементы размещены (сработал слушатель)
-                    frameLayout.viewTreeObserver.removeOnGlobalLayoutListener(this) // удаление слушателя
-                    val elementWidth = frameLayout.width
-                    val elementHeight = frameLayout.height
+        // отслеживание изменений в размерах контейнера
+        frameLayout.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener { // слушатель 
+            // метод для ожидания загрузки всего макета 
+            override fun onGlobalLayout() { 
+                frameLayout.viewTreeObserver.removeOnGlobalLayoutListener(this) // удаление слушателя
+                val elementWidth = frameLayout.width
+                val elementHeight = frameLayout.height
 
-                    playerTank = createTank(elementWidth, elementHeight)
-                    eagle = createEagle(elementWidth, elementHeight)
+                playerTank = createTank(elementWidth, elementHeight)
+                eagle = createEagle(elementWidth, elementHeight)
 
-                    // добавление танка и орла в список элемнетов
-                    elementsDrawer.drawElementsList(listOf(playerTank.element, eagle))
-                    
-                    // передача объекта bulletDrawer для вражеской стрельбы
-                    enemyDrawer.bulletDrawer = bulletDrawer
-                }
-            })
+                // добавление танка и орла в список элемнетов
+                elementsDrawer.drawElementsList(listOf(playerTank.element, eagle))
+                
+                // передача объекта bulletDrawer для вражеской стрельбы
+                enemyDrawer.bulletDrawer = bulletDrawer
+            }
+        })
     }
 
     // метод для переключения режим редактирования

@@ -8,5 +8,5 @@ class Bullet (
     val view: View,
     val direction: Direction,
     val tank: Tank, // ссылка на танк
-    var canMoveFurther: Boolean = true // может  ли пуля продолжать движение
+    var canMoveFurther: Boolean = true // может ли пуля продолжать движение
 ) { }

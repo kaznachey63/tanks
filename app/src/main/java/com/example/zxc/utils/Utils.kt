@@ -14,7 +14,7 @@ import kotlin.random.Random
 // для вероятностей (100%)
 const val TOTAL_PERCENT = 100
 
-// метод, определяющий,тможет ли перемещаться элемент, в зависимости от координат (не выходя за рамки)
+// метод, определяющий, тможет ли перемещаться элемент, в зависимости от координат (не выходя за рамки)
 fun View.checkViewCanMoveThroughBorder(coordinate: Coordinate): Boolean {
     return coordinate.top >= 0 &&
         coordinate.top + this.height <= binding.container.height &&
@@ -71,7 +71,7 @@ fun FrameLayout.runOnUiThread(block:() -> Unit) { // тип функции; бе
     (this.context as Activity).runOnUiThread { block() } // приведение контекста к типу активити
 }
 
-// метод проверки шанса (%) изм. направления движения
+// метод проверки шанса (%) 
 fun checkIfChanceBiggerThanRandom(percentChance: Int): Boolean {
     return Random.nextInt(TOTAL_PERCENT) <= percentChance
 }

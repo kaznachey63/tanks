@@ -8,11 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.zxc.databinding.ActivityScoreBinding
 import com.example.zxc.sounds.ScoreSoundPlayer
 
+// код запроса 
 const val SCORE_REQUEST_CODE = 100
 
 class ScoreActivity : AppCompatActivity() {
 
-    companion object{
+    companion object {
         const val EXTRA_SCORE = "extra_score"
 
         fun createIntent(context: Context, score: Int): Intent {
