@@ -71,26 +71,6 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
         MainSoundPlayer(this, this)
     }
 
-    // объект для отрисовки сетки
-    private val gridDrawer by lazy {
-        GridDrawer(binding.container)
-    }
-
-    // объект для отрисовк игровых элементов
-    private val elementsDrawer by lazy {
-        ElementsDrawer(binding.container)
-    }
-
-    // объект для загрузки и сохранения уровней
-    private val levelStorage by lazy {
-        LevelStorage (this)
-    }
-
-    // объект для отрисовки и управления врагами
-    private val enemyDrawer by lazy {
-        EnemyDrawer(binding.container, elementsDrawer.elementsOnContainer, soundManager, gameCore)
-    }
-
     // метод для создания танка
     private fun createTank(elementWidth: Int, elementHeight: Int): Tank {
         playerTank = Tank( // new
@@ -112,7 +92,7 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
         return eagle
     }
 
-    // метод рассчитывает координаты для размещения танка 
+    // метод рассчитывает координаты для размещения танка
     private fun getPlayerTankCoordinate(width: Int, height: Int) = Coordinate(
         top = (height - height % 2)
                 - (height - height % 2) % CELL_SIZE
@@ -122,7 +102,7 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
                 - Material.PLAYER_TANK.width * CELL_SIZE
     )
 
-    // метод рассчитывает координаты для размещения орла 
+    // метод рассчитывает координаты для размещения орла
     private fun getEagleCoordinate(width: Int, height: Int) = Coordinate(
         top = (height - height % 2)
                 - (height - height % 2) % CELL_SIZE
@@ -130,6 +110,26 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
         left = (width - width % (2 * CELL_SIZE)) / 2
                 - Material.EAGLE.width / 2 * CELL_SIZE
     )
+
+    // объект для отрисовки сетки
+    private val gridDrawer by lazy {
+        GridDrawer(binding.container)
+    }
+
+    // объект для отрисовк игровых элементов
+    private val elementsDrawer by lazy {
+        ElementsDrawer(binding.container)
+    }
+
+    // объект для загрузки и сохранения уровней
+    private val levelStorage by lazy {
+        LevelStorage(this)
+    }
+
+    // объект для отрисовки и управления врагами
+    private val enemyDrawer by lazy {
+        EnemyDrawer(binding.container, elementsDrawer.elementsOnContainer, soundManager, gameCore)
+    }
 
     // метод запуска программы
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -160,23 +160,25 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
     // метод который рассчитывает размеры контейнера и создает игровые объекты
     private fun countWidthHeight() {
         val frameLayout = binding.container
+
         // отслеживание изменений в размерах контейнера
-        frameLayout.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener { // слушатель 
-            // метод для ожидания загрузки всего макета 
-            override fun onGlobalLayout() { 
-                frameLayout.viewTreeObserver.removeOnGlobalLayoutListener(this) // удаление слушателя
-                val elementWidth = frameLayout.width
-                val elementHeight = frameLayout.height
+        frameLayout.viewTreeObserver.addOnGlobalLayoutListener(object :
+            OnGlobalLayoutListener { // слушатель
+                // метод для ожидания загрузки всего макета
+                override fun onGlobalLayout() {
+                    frameLayout.viewTreeObserver.removeOnGlobalLayoutListener(this) // удаление слушателя
+                    val elementWidth = frameLayout.width
+                    val elementHeight = frameLayout.height
 
-                playerTank = createTank(elementWidth, elementHeight)
-                eagle = createEagle(elementWidth, elementHeight)
+                    playerTank = createTank(elementWidth, elementHeight)
+                    eagle = createEagle(elementWidth, elementHeight)
 
-                // добавление танка и орла в список элемнетов
-                elementsDrawer.drawElementsList(listOf(playerTank.element, eagle))
-                
-                // передача объекта bulletDrawer для вражеской стрельбы
-                enemyDrawer.bulletDrawer = bulletDrawer
-            }
+                    // добавление танка и орла в список элемнетов
+                    elementsDrawer.drawElementsList(listOf(playerTank.element, eagle))
+
+                    // передача объекта bulletDrawer для вражеской стрельбы
+                    enemyDrawer.bulletDrawer = bulletDrawer
+                }
         })
     }
 
@@ -197,13 +199,14 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
     private fun hideSettings() {
         gridDrawer.removeGrid()
         binding.materialsContainer.visibility = INVISIBLE
+    }
 
     // метод для создания меню
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        
-        // отгружает меню из макета 
+
+        // отгружает меню из макета
         menuInflater.inflate(R.menu.settings, menu)
-        
+
         item = menu!!.findItem(R.id.menu_play)
         return true
     }
@@ -227,17 +230,17 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
 
             // начать игру
             R.id.menu_play -> {
-                if(editMode)  {
+                if (editMode) {
                     return true
                 }
                 showIntro()
 
                 // воспр. музыки и начало игры
-                if (soundManager.areSoundsReady()){
+                if (soundManager.areSoundsReady()) {
                     gameCore.startOrPauseTheGame()
-                    if (gameCore.isPlaying()){
+                    if (gameCore.isPlaying()) {
                         resumeTheGame()
-                    } else{
+                    } else {
                         pauseTheGame()
                     }
                 }
@@ -250,51 +253,51 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
     }
 
     // метод продолжения игры
-    private fun resumeTheGame(){
-        item.icon = ContextCompat.getDrawable(this, R.drawable.ic_baseline_pause_24)
+    private fun resumeTheGame() {
+        item.icon = ContextCompat.getDrawable(this, R.drawable.ic_pause)
         gameCore.resumeTheGame() // вызов метода в базе
     }
 
     // метод для отображения интро игры
-    private fun showIntro(){
-        if (gameStarted){
+    private fun showIntro() {
+        if (gameStarted) {
             return
         }
         gameStarted = true
         soundManager.loadSounds()
     }
 
-    // метод для паузы игры 
+    // метод для паузы игры
     private fun pauseTheGame() {
-        item.icon = ContextCompat.getDrawable(this , R.drawable.ic_play)
+        item.icon = ContextCompat.getDrawable(this, R.drawable.ic_play)
         gameCore.pauseTheGame()
         soundManager.pauseSounds()
     }
 
     // переопред. метода для паузы игры
-    override fun onPause(){
+    override fun onPause() {
         super.onPause()
         pauseTheGame()
     }
 
     /*    private fun startTheGame() {
-            enemyDrawer.startEnemyCreation()
-            item.icon = ContextCompat.getDrawable(this , R.drawable.ic_baseline_pause_24)
-            soundManager.playIntroMusic()
-        }
-    */
+        enemyDrawer.startEnemyCreation()
+        item.icon = ContextCompat.getDrawable(this , R.drawable.ic_baseline_pause_24)
+        soundManager.playIntroMusic()
+    }
+*/
 
     // метод для обработки нажатия клавиш
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (!gameCore.isPlaying()){
+        if (!gameCore.isPlaying()) {
             return super.onKeyDown(keyCode, event)
         } // если не играем, клавиши не перехвачены
 
-        when(keyCode){
-            KEYCODE_DPAD_UP -> move(UP)
-            KEYCODE_DPAD_DOWN -> move(DOWN)
-            KEYCODE_DPAD_RIGHT -> move(RIGHT)
-            KEYCODE_DPAD_LEFT -> move(LEFT)
+        when (keyCode) {
+            KEYCODE_DPAD_UP -> onButtonPressed(UP)
+            KEYCODE_DPAD_DOWN -> onButtonPressed(DOWN)
+            KEYCODE_DPAD_RIGHT -> onButtonPressed(RIGHT)
+            KEYCODE_DPAD_LEFT -> onButtonPressed(LEFT)
             KEYCODE_SPACE -> bulletDrawer.addNewBulletForTank(playerTank)
         }
 
@@ -309,16 +312,16 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
 
     // метод для обработки отпускания клавиш
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        if (!gameCore.isPlaying()){
+        if (!gameCore.isPlaying()) {
             return super.onKeyUp(keyCode, event)
         } // если не играем, клавиши не перехвачены
 
         when (keyCode) {
-            KEYCODE_DPAD_UP, 
+            KEYCODE_DPAD_UP,
             KEYCODE_DPAD_LEFT,
-            KEYCODE_DPAD_DOWN, 
-            KEYCODE_DPAD_RIGHT 
-            -> onButtonReleased()
+            KEYCODE_DPAD_DOWN,
+            KEYCODE_DPAD_RIGHT
+                -> onButtonReleased()
         }
         return super.onKeyUp(keyCode, event)
     }
@@ -326,7 +329,7 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
     // метод для обработки нажатия кнопки
     private fun onButtonPressed(direction: Direction) {
         soundManager.tankMove()
-        playerTank.move(direction, binding.container, elementsDrawer.elementsOnContainer)
+        move(direction)
     }
 
     // метод для обработки отпускания кнопки
@@ -337,13 +340,13 @@ class MainActivity : AppCompatActivity(), ProgressIndicator {
 
     // метод для обработки результата активности
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK && requestCode == SCORE_REQUEST_CODE){
+        if (resultCode == Activity.RESULT_OK && requestCode == SCORE_REQUEST_CODE) {
             recreate()
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    // метод для отображения прогресса 
+    // метод для отображения прогресса
     override fun showProgress() {
         binding.container.visibility = INVISIBLE
         binding.totalContainer.setBackgroundResource(R.color.gray)

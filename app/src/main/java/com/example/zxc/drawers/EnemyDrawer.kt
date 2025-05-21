@@ -12,6 +12,7 @@ import com.zxc.models.Element
 import com.zxc.models.Tank
 import com.zxc.utils.checkIfChanceBiggerThanRandom
 import com.zxc.utils.drawElement
+import com.zxc.enums.Material.ENEMY_TANK
 
 // макс. кол-во врагов
 private const val MAX_ENEMY_AMOUNT = 20

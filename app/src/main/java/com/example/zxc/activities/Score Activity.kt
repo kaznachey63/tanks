@@ -51,7 +51,7 @@ class ScoreActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityScoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        // setContentView(R.layout.activity_score)
+
         score = intent.getIntExtra(EXTRA_SCORE, 0)
         scoreSoundPlayer.playScoreSound()
     }

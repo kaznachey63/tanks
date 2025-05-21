@@ -2,6 +2,7 @@ package com.zxc
 
 import android.app.Activity
 import android.view.View
+import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import com.zxc.activities.SCORE_REQUEST_CODE
 import com.zxc.activities.ScoreActivity
@@ -55,9 +56,9 @@ class GameCore(private val activity: Activity) {
 
             // слушатель событий анимации
             slideUp.setAnimationListener(object : Animation.AnimationListener {
-                // override fun onAnimationStart(animation: Animation?) { }
+                override fun onAnimationStart(animation: Animation?) { }
 
-                // override fun onAnimationRepeat(animation: Animation?) { }
+                override fun onAnimationRepeat(animation: Animation?) { }
 
                 // метод срабатывает когда анимация заканчивается 
                 override fun onAnimationEnd(animation: Animation?) {

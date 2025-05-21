@@ -15,12 +15,11 @@ import kotlin.random.Random
 const val TOTAL_PERCENT = 100
 
 // метод, определяющий, тможет ли перемещаться элемент, в зависимости от координат (не выходя за рамки)
-fun View.checkViewCanMoveThroughBorder(coordinate: Coordinate): Boolean {
-    return coordinate.top >= 0 &&
-        coordinate.top + this.height <= binding.container.height &&
-        coordinate.left >= 0 &&
-        coordinate.left + this.width <= binding.container.width
-}
+fun View.checkViewCanMoveThroughBorder(coordinate: Coordinate) =
+    coordinate.top >= 0 &&
+            coordinate.top + this.height <= binding.container.height &&
+            coordinate.left >= 0 &&
+            coordinate.left + this.width <= binding.container.width
 
 // метод для поиска элементов по координатам
 fun getElementByCoordinates(

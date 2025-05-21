@@ -56,10 +56,9 @@ class BulletDrawer(
     }
 
     // метод для проверки наличия пули 
-    private fun Tank.alreadyHasBullet(): Boolean {
+    private fun Tank.alreadyHasBullet(): Boolean =
         // метод для поиска пули (первой подходящей)
         allBullets.firstOrNull { it.tank == this } != null
-    }
 
     // метод для движения всех пуль 
     private fun moveAllBullets() {
@@ -81,7 +80,7 @@ class BulletDrawer(
             bullet.stopIntersectingBullets() // проверяем на столкновение
 
             // если пуля не может двигаться - останавливаем, пропускаем
-            if (!bullet.canBulletGoFurther()) {
+            if (!bullet.canBulletGoFurther()){
                 stopBullet(bullet)
                 continue
             }
@@ -91,7 +90,7 @@ class BulletDrawer(
                 Direction.UP -> (view.layoutParams as FrameLayout.LayoutParams).topMargin -= BULLET_HEIGHT
                 Direction.DOWN -> (view.layoutParams as FrameLayout.LayoutParams).topMargin += BULLET_HEIGHT
                 Direction.LEFT -> (view.layoutParams as FrameLayout.LayoutParams).leftMargin -= BULLET_HEIGHT
-                Direction.RIGHT -> (view.layoutParams as FrameLayout.LayoutParams).rightMargin += BULLET_HEIGHT
+                Direction.RIGHT -> (view.layoutParams as FrameLayout.LayoutParams).leftMargin += BULLET_HEIGHT
             }
             
             // проверка на столкновения с объектами в зависимости направления пули
@@ -105,16 +104,23 @@ class BulletDrawer(
             }
         }
 
+        // удаляем пули которые закончили свою жизнь
         removeInconsistentBullets()
     }
 
+    // метод для удаления пуль, закончивших движение
     private fun removeInconsistentBullets() {
+        // оставляем только те, которые НЕ могут двигаться дальше
         val removingList = allBullets.filter { !it.canMoveFurther }
+
+        // для каждой запускаем в UI-потоке удаление её виз. представления из контейнера
         removingList.forEach {
             container.runOnUiThread {
                 container.removeView(it.view)
             }
         }
+
+        // удаление из списка
         allBullets.removeAll(removingList)
     }
 
@@ -139,12 +145,11 @@ class BulletDrawer(
     }
 
     // метод для проверки продолжения движения пули
-    private fun Bullet.canBulletGoFurther() {
+    private fun Bullet.canBulletGoFurther() =
         // не выходит ли пуля за рамки (с полученнным координатами передаем)
         // И
         // может ли пуля рподолжать движение
         this.view.checkViewCanMoveThroughBorder(this.view.getViewCoordinate()) && this.canMoveFurther
-    }
 
     // определяет направление движения пули
     private fun chooseBehaviourInTermsOfDirections(bullet: Bullet) {
@@ -254,17 +259,31 @@ class BulletDrawer(
         }
     }
 
+    // метод для получения списка координат верхних углов ячейки сетки, в которой находится пуля,
+    // с учемтом направления вверх / низ
     private fun getCoordinatesForTopOrBottomDirection(bullet: Bullet): List<Coordinate> {
+        // текущие координаты пули
         val bulletCoordinate = bullet.view.getViewCoordinate()
+
+        // левый край
         val leftCell = bulletCoordinate.left - bulletCoordinate.left % CELL_SIZE
+
+        // правый край
         val rightCell = leftCell + CELL_SIZE
+
+        // верх. коордианат
         val topCoordinate = bulletCoordinate.top - bulletCoordinate.top % CELL_SIZE
+
+        // список из 2-х коордиант
         return listOf(
             Coordinate(topCoordinate, leftCell),
             Coordinate(topCoordinate, rightCell)
         )
     }
 
+    // такой же как и выше
+    // метод для получения списка координат верхних углов ячейки сетки, в которой находится пуля,
+     // с учемтом направления лево / право
     private fun getCoordinatesForLeftOrRightDirection(bullet: Bullet): List<Coordinate> {
         val bulletCoordinate = bullet.view.getViewCoordinate()
         val topCell = bulletCoordinate.top - bulletCoordinate.top % CELL_SIZE
@@ -276,11 +295,14 @@ class BulletDrawer(
         )
     }
 
+    // метод создания пули
     fun createBullet(myTank: View, currentDirection: Direction): ImageView {
-        return ImageView(container.context)
-            .apply {
+        return ImageView(container.context) // создание нового представления пули
+            .apply { // задание свойств
                 this.setImageResource(R.drawable.bullet)
                 this.layoutParams = FrameLayout.LayoutParams(BULLET_WIDTH, BULLET_HEIGHT)
+
+                // расчет коордиант появления пули
                 val bulletCoordinate = getBulletCoordinates(this, myTank, currentDirection)
                 (this.layoutParams as FrameLayout.LayoutParams).topMargin = bulletCoordinate.top
                 (this.layoutParams as FrameLayout.LayoutParams).leftMargin = bulletCoordinate.left
@@ -288,41 +310,60 @@ class BulletDrawer(
             }
     }
 
+    // метод для вычисления нач. кооорд. пули
     private fun getBulletCoordinates(
         bullet: ImageView,
         myTank: View,
         currentDirection: Direction
     ): Coordinate {
+        // получение левого и верхнего отсупа для преобраз. в коордианты
         val tankLeftTopCoordinate = Coordinate(myTank.top, myTank.left)
 
-        when(currentDirection){
+        // определение коордиант в зависимости от направления движения танка
+        when(currentDirection) {
             Direction.UP -> {
+                // вверх - выше танка
                 return Coordinate(
+                    // выше танка на высоту пули
                     top = tankLeftTopCoordinate.top - bullet.layoutParams.height,
-                    left = getDistanceToMiddleOfTanks(tankLeftTopCoordinate.left, bullet.layoutParams.width))
+
+                    // по центру танка по горизонтали
+                    left = getDistanceToMiddleOfTanks(tankLeftTopCoordinate.left, bullet.layoutParams.width)
+                )
             }
 
             Direction.DOWN -> {
+                // вниз - под танком
                 return Coordinate(
                     top = tankLeftTopCoordinate.top + myTank.layoutParams.height,
-                    left = getDistanceToMiddleOfTanks(tankLeftTopCoordinate.left, bullet.layoutParams.width))
+                    left = getDistanceToMiddleOfTanks(tankLeftTopCoordinate.left, bullet.layoutParams.width)
+                )
             }
+
             Direction.LEFT -> {
+                // влево - левее танка
                 return Coordinate(
                     top = getDistanceToMiddleOfTanks(tankLeftTopCoordinate.top, bullet.layoutParams.height),
-                    left = tankLeftTopCoordinate.left  - bullet.layoutParams.width)
+                    left = tankLeftTopCoordinate.left - bullet.layoutParams.width
+                )
             }
+
             Direction.RIGHT -> {
+                // вправо - правее танка
                 return Coordinate(
                     top = getDistanceToMiddleOfTanks(tankLeftTopCoordinate.top, bullet.layoutParams.height),
-                    left = tankLeftTopCoordinate.left  + myTank.layoutParams.width)
+                    left = tankLeftTopCoordinate.left + myTank.layoutParams.width
+                )
             }
         }
 
+        // не распознано, возврат исх. значений
         return tankLeftTopCoordinate
     }
 
-    private fun getDistanceToMiddleOfTanks(startCoordinate: Int, bulletSize: Int):Int {
-        return startCoordinate + (CELL_SIZE - bulletSize/2)
+    // метод для смещения пули в центр танка по нужной оси
+    private fun getDistanceToMiddleOfTanks(startCoordinate: Int, bulletSize: Int): Int {
+        // центр ячейки минус половина размера пули
+        return startCoordinate + (CELL_SIZE - bulletSize / 2)
     }
 }
