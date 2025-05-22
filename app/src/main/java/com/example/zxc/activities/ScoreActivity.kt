@@ -37,6 +37,7 @@ class ScoreActivity : AppCompatActivity() {
                 runOnUiThread {
                     binding.scoreTextView.text = currentScore.toString()
                     currentScore += 100
+                    // currentScore += 1
                 }
                 Thread.sleep(150)
             }

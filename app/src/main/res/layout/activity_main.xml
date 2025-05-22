@@ -47,6 +47,8 @@
             android:textStyle="bold"
             android:layout_gravity="center"
             android:visibility="gone"
+            android:elevation="10dp"
+            android:translationZ="10dp"
             tools:visibility="visible" />
     </FrameLayout>
     <LinearLayout
